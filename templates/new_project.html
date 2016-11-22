@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12"></div>
+            <h1>Create a new project</h1>
+            <form id="newProject">
+                <div class="form-group">
+                    <label>Project Name</label>
+                    <input type="text" class="form-control" placeholder="Project name">
+                </div>
+                <div class="form-group">
+                    <label for="exampleInputPassword1">Password</label>
+                    <input type="password" class="form-control" id="exampleInputPassword1" placeholder="Password">
+                </div>
+                <div class="form-group">
+                    <label for="description">Description</label>
+                    <textarea class="form-control" id="description" rows="3"></textarea>
+                </div>
+            </form>
+            <button id="submit" class="btn btn-primary">Submit</button>
+        </div>
+    </div>
+
+    <script>
+    $("#submit").click(function(e) {
+        $form = $("#newProject");
+        debugger;
+        console.log("TESTING TESTING")
+    });
+    </script>
+{% endblock %}
