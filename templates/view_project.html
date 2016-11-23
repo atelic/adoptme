@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% set caretaker = project.caretaker %}
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h1>{{ project.project_name }}</h1>
+                <small>Maintained by: <a
+                        href="/users/{{ caretaker.id }}">{{ caretaker.username }}</a>
+                </small>
+                <br>
+                <p>{{ project.description }}</p>
+                <br>
+            </div>
+            <div class="row">
+                <div class="col-md-3">
+                    <a class="btn btn-primary" href="{{ project.github_repo }}">View on GitHub</a>
+                </div>
+                {% if current_user %}
+                    {% if current_user.id != caretaker.id %}
+                        <div class="col-md-3">
+                            <button class="btn btn-success">Apply to maintain</button>
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <div class="col-md-3">
+                        <button class="btn btn-success">Apply to maintain</button>
+                    </div>
+                {% endif %}
+
+                {% if current_user %}
+                    {% if caretaker.id == current_user.id %}
+                        <div class="col-md-3">
+                            <button id="delete" class="btn btn-danger">Delete</button>
+                        </div>
+                        <div class="col-md-3">
+                            {#                            {# Not implemented yet #}
+                            <button class="btn btn-success">Edit</button>
+                        </div>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <script>
+        $("#delete").click(function () {
+            $.ajax({
+                type: "DELETE",
+                url: "/projects/{{ project.id }}",
+                contentType: 'application/json;charset=UTF-8',
+                success: function () {
+                    window.location.href = '/'
+                }
+            });
+        });
+    </script>
+{% endblock %}

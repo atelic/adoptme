@@ -107,6 +107,19 @@ def new_project():
         return jsonify(proj.to_dict())
 
 
+@app.route('/projects/<pid>', methods=['GET', 'DELETE'])
+def view_project(pid):
+    proj = Project.query.get(pid)
+    if request.method == 'DELETE':
+        db.session.delete(proj)
+        db.session.commit()
+        return jsonify({
+            'success': True
+        })
+    else:
+        return render_template('view_project.html', project=proj)
+
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     form = RegisterForm()
