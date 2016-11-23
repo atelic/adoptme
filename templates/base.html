@@ -10,8 +10,8 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.5/css/bootstrap.min.css"
           integrity="sha384-AysaV+vQoT3kOAXZkl02PThvDr8HYKPZhNT5h/CXfBThSRXQ6jW5DO2ekP5ViFdi" crossorigin="anonymous">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"
-        integrity="sha384-3ceskX3iaEnIogmQchP8opvBy3Mi7Ce34nWjpBIwVTHfGYWQS9jwHDVRnpKKHJg7"
-        crossorigin="anonymous"></script>
+            integrity="sha384-3ceskX3iaEnIogmQchP8opvBy3Mi7Ce34nWjpBIwVTHfGYWQS9jwHDVRnpKKHJg7"
+            crossorigin="anonymous"></script>
     <title>Adopt.me()</title>
 </head>
 <body>
@@ -22,10 +22,25 @@
         <li class="nav-item">
             <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
         </li>
+
         <li class="nav-item">
             <a class="nav-link" href="/projects/new">New Project</a>
         </li>
-
+        {% if current_user.is_authenticated %}
+            <li class="nav-item">
+                <a href="#" class="nav-link">{{ current_user.username }}</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/logout">Log out</a>
+            </li>
+        {% else %}
+            <li class="nav-item">
+                <a class="nav-link" href="/login">Log in</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/register">Sign up</a>
+            </li>
+        {% endif %}
     </ul>
     <form class="form-inline float-xs-right">
         <input class="form-control" type="text" placeholder="Search">
