@@ -62,13 +62,14 @@ class Project(db.Model):
     github_repo = db.Column(db.String(255))
     description = db.Column(db.Text())
 
-    def __init__(self, name, repo, description):
+    def __init__(self, name, repo, description, caretaker_id=None):
         self.project_name = name
         self.github_repo = repo
         self.description = description
-        self.caretaker_id = None
-        self.caretaker = None
+        self.caretaker_id = caretaker_id
         self.tags = ''
+        user = User.query.get(caretaker_id)
+        self.caretaker = user
 
     def __repr__(self):
         return '<Project {}>'.format(self.project_name)
@@ -93,13 +94,14 @@ def index():
 
 
 @app.route('/projects/new', methods=['GET', 'POST'])
+@login_required
 def new_project():
     if request.method == 'GET':
         return render_template('new_project.html')
     else:
         j = request.get_json()
         # Probably should handle exceptions
-        proj = Project(j['name'], j['link'], j['description'])
+        proj = Project(j['name'], j['link'], j['description'], caretaker_id=j['caretaker_id'])
         db.session.add(proj)
         db.session.commit()
         return jsonify(proj.to_dict())

@@ -28,7 +28,8 @@
         var data = {
             'name': $("#projectName").val(),
             'link': $("#githublink").val(),
-            'description': $("#description").val()
+            'description': $("#description").val(),
+            'caretaker_id': {{ current_user.id }}
         };
         $.ajax({
             type: "POST",
