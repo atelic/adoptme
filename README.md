@@ -2,6 +2,7 @@
 
 ### Installing
 `pip install -r requirements.txt`
+
 `./get_popular_projects`
 
 ### Running
