@@ -13,6 +13,11 @@
             integrity="sha384-3ceskX3iaEnIogmQchP8opvBy3Mi7Ce34nWjpBIwVTHfGYWQS9jwHDVRnpKKHJg7"
             crossorigin="anonymous"></script>
     <title>Adopt.me()</title>
+    <style>
+        .navbar {
+            margin-bottom: 20px;
+        }
+    </style>
 </head>
 <body>
 <!-- Begin nav -->
@@ -28,7 +33,7 @@
         </li>
         {% if current_user.is_authenticated %}
             <li class="nav-item">
-                <a href="#" class="nav-link">{{ current_user.username }}</a>
+                <a href="/users/{{ current_user.id }}" class="nav-link">{{ current_user.username }}</a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="/logout">Log out</a>

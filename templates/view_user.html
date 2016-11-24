@@ -1,11 +1,12 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 
 {% block content %}
     <div class="container">
         <div class="row">
             <div class="col-md-9">
-                <h1>Most recent projects</h1><br>
-                {% for project in top_projects %}
+                <h1>Projects maintained by {{ user.username }}:</h1>
+
+                {% for project in owns %}
                     <div class="card">
                         <div class="card-block">
                             <h4 class="card-title">{{ project.project_name }}</h4>
@@ -17,12 +18,14 @@
                 {% endfor %}
             </div>
             <div class="col-md-3">
-                <h1>Browse Tags</h1><br>
+                <h1>User details: </h1>
                 <ul class="list-group">
-                    <li class="list-group-item"><a href="/tags/python">Python</a></li>
-                    <li class="list-group-item"><a href="/tags/javascript">Javascript</a></li>
+                    <li class="list-group-item">Number of projects maintained: {{ owns|length }}</li>
+                    <li class="list-group-item">Joined: {{ user.date_joined }}</li>
+                    <li class="list-group-item"><a href="{{ user.github_id }}">GitHub Profile</a></li>
                 </ul>
             </div>
         </div>
     </div>
+
 {% endblock %}

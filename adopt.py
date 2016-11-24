@@ -120,6 +120,14 @@ def view_project(pid):
         return render_template('view_project.html', project=proj)
 
 
+@app.route('/users/<uid>')
+def view_user(uid):
+    user = User.get(uid)
+    # owns = db.engine.execute("select * from project where caretaker_id = {} limit 10".format(user.id))
+    owns = Project.query.filter_by(caretaker_id=user.id).limit(10)
+    return render_template('view_user.html', user=user, owns=list(owns))
+
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     form = RegisterForm()
@@ -167,4 +175,4 @@ def logout():
 if __name__ == '__main__':
     db.init_app(app)
     db.create_all()
-    app.run()
+    app.run(debug=True)
