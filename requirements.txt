@@ -4,3 +4,4 @@ flask-login
 wtforms
 flask_wtf
 flask_bootstrap
+requests

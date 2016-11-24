@@ -61,6 +61,7 @@ class Project(db.Model):
     tags = db.Column(db.String(255))
     github_repo = db.Column(db.String(255))
     description = db.Column(db.Text())
+    date_added = db.Column(db.Date(), default=datetime.datetime.now())
 
     def __init__(self, name, repo, description, caretaker_id=None):
         self.project_name = name
@@ -68,8 +69,13 @@ class Project(db.Model):
         self.description = description
         self.caretaker_id = caretaker_id
         self.tags = ''
-        user = User.query.get(caretaker_id)
-        self.caretaker = user
+        if caretaker_id:
+            import ipdb;
+            ipdb.set_trace()
+            user = User.query.get(caretaker_id)
+            self.caretaker = user
+        else:
+            self.caretaker = None
 
     def __repr__(self):
         return '<Project {}>'.format(self.project_name)
@@ -89,7 +95,7 @@ def load_user(user_id):
 
 @app.route('/')
 def index():
-    top_projects = Project.query.all()[:10]
+    top_projects = sorted(Project.query.all()[:10], key=lambda p: p.date_added, reverse=True)
     return render_template('home.html', top_projects=top_projects)
 
 
