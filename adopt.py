@@ -70,8 +70,6 @@ class Project(db.Model):
         self.caretaker_id = caretaker_id
         self.tags = ''
         if caretaker_id:
-            import ipdb;
-            ipdb.set_trace()
             user = User.query.get(caretaker_id)
             self.caretaker = user
         else:
@@ -90,11 +88,13 @@ class Project(db.Model):
 
 @login_manager.user_loader
 def load_user(user_id):
+    # return db.engine.execute("select * from user where user.id = {}".format(user_id))
     return User.get(user_id)
 
 
 @app.route('/')
 def index():
+    # top_projects = db.engine.execute("select * from project limit 10 order by project.date_added desc")
     top_projects = sorted(Project.query.all()[:10], key=lambda p: p.date_added, reverse=True)
     return render_template('home.html', top_projects=top_projects)
 
@@ -108,6 +108,7 @@ def new_project():
         j = request.get_json()
         # Probably should handle exceptions
         proj = Project(j['name'], j['link'], j['description'], caretaker_id=j['caretaker_id'])
+        # db.engine.execute("insert into project values (NULL, {}, NULL, '', {}, {})".format(j['name'], j['link'], j['description']))
         db.session.add(proj)
         db.session.commit()
         return jsonify(proj.to_dict())
@@ -117,6 +118,7 @@ def new_project():
 def view_project(pid):
     proj = Project.query.get(pid)
     if request.method == 'DELETE':
+        # db.engine.execute("delete from project where project.id={}".format(pid))
         db.session.delete(proj)
         db.session.commit()
         return jsonify({

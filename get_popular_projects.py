@@ -3,7 +3,7 @@ import sys
 
 import requests
 
-from adopt import db, Project, User
+from adopt import db, Project, User, app
 
 GH_API_BASE = 'https://api.github.com/'
 
@@ -55,4 +55,6 @@ def main(dry=True):
 
 if __name__ == '__main__':
     dry = '--dry' in sys.argv or '-d' in sys.argv
+    db.init_app(app)
+    db.create_all()
     main(dry=dry)
