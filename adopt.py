@@ -128,6 +128,25 @@ def view_project(pid):
         return render_template('view_project.html', project=proj)
 
 
+@app.route('/projects/<pid>/edit', methods=['GET', 'PATCH'])
+def edit_project(pid):
+    proj = Project.query.get(pid)
+
+    if request.method == 'GET':
+        return render_template('edit_project.html', project=proj)
+    else:
+        j = request.get_json()
+        name = j['name']
+        link = j['link']
+        desc = j['description']
+        proj.project_name = name or proj.project_name
+        proj.github_repo = link or proj.github_repo
+        proj.description = desc or proj.description
+        db.session.add(proj)
+        db.session.commit()
+        return jsonify(proj.to_dict())
+
+
 @app.route('/users/<uid>')
 def view_user(uid):
     user = User.get(uid)
