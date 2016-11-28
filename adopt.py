@@ -139,6 +139,12 @@ def edit_project(pid):
         name = j['name']
         link = j['link']
         desc = j['description']
+        # sql = (
+        #     'update project'
+        #     'set project_name={name}, github_repo={link}, description={desc}'
+        #     'where id={pid}'
+        # ).format(name=name, link=link, desc=desc, pid=proj.pid)
+
         proj.project_name = name or proj.project_name
         proj.github_repo = link or proj.github_repo
         proj.description = desc or proj.description
