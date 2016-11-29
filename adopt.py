@@ -11,14 +11,11 @@ import os.path
 from forms import RegisterForm, LoginForm
 
 app = Flask(__name__)
-<<<<<<< HEAD
 #app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/test.db'
-=======
 
 #Ryan's DB credentials
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:pword@localhost/DBProj'
 
->>>>>>> c37fb8af447323cc129c8aeeed59546186aabd74
 # For PCs since no /tmp on PC
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(tempfile.gettempdir(), 'test.db')
 app.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT'
