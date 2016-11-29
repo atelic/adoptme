@@ -140,6 +140,7 @@ def view_user(uid):
 def view_project_tag(tag):
     #proj = Project.query.filter(tags = tag)
     proj = db.engine.execute("select * from project where tags like '%%{0}%%'".format(tag))
+    
     if request.method == 'DELETE':
         db.session.delete(proj)
         db.session.commit()
