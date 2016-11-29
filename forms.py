@@ -3,7 +3,7 @@ from wtforms import StringField, PasswordField, validators
 
 
 class LoginForm(FlaskForm):
-    username = StringField('Username', [validators.Length(min=4, max=25)])
+    username = StringField('Username')
     password = PasswordField('Password', [
         validators.DataRequired(),
     ])

@@ -12,10 +12,18 @@ from forms import RegisterForm, LoginForm
 
 app = Flask(__name__)
 
+
 #app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/test.db'
+
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/test.db'
+
+# Ryan's DB credentials
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:pword@localhost/DBProj'
+
 
 # For PCs since no /tmp on PC
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(tempfile.gettempdir(), 'test.db')
+
 app.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT'
 db = SQLAlchemy(app)
 login_manager = LoginManager()
@@ -29,12 +37,13 @@ class Application(db.Model):
     project_id = db.Column(db.Integer, db.ForeignKey('project.id'))
     project = db.relationship('Project')
     justification = db.Column(db.String(200))
-    __tablename__= 'application'
+    __tablename__ = 'application'
 
     def __init__(self, user, project, justification):
         self.user = user
         self.project = project
         self.justification = justification
+
 
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
@@ -96,11 +105,8 @@ class Project(db.Model):
         else:
             self.caretaker = None
 
-
-
-
     def __repr__(self):
-    	return '<Project {}>'.format(self.project_name)
+        return '<Project {}>'.format(self.project_name)
 
     def to_dict(self):
         return {
@@ -109,12 +115,35 @@ class Project(db.Model):
             'description': self.description
         }
 
-
+class Orphan(db.Model):
+    orphan_id = db.Column(db.Integer, primary_key = True)
+    project_id = db.Column(db.Integer, db.ForeignKey('project.id'), nullable=True)
+    project = db.relationship('Project')
+    project_name = db.Column(db.String(120))
+    date_orphaned = db.Column(db.Date(), default=datetime.datetime.now())    
+    
+    def __init__(self, name, project_id = None):
+        self.project_name = name
+        if project_id:
+            project = Project.query.get(project_id)
+            self.project = project
+        else:
+            self.project = 'test'
+    
+class Organization(db.Model):
+    org_id = db.Column(db.Integer, primary_key=True)
+    org_name = db.Column(db.String(120))
+    license_type = db.Column(db.String(20))
+        
+class Adopted(db.Model):
+    adopted_id = db.Column(db.Integer, primary_key = True)
+    project_id = db.Column(db.Integer, db.ForeignKey('project.id'), nullable=True)
+   
+ 
 @login_manager.user_loader
 def load_user(user_id):
     # return db.engine.execute("select * from user where user.id = {}".format(user_id))
     return User.get(user_id)
-
 
 
 @app.route('/')
@@ -169,9 +198,6 @@ def proj_app(pid):
         return render_template('project_application.html', project=proj)
 
 
-
-
-
 @app.route('/projects/<pid>', methods=['GET', 'DELETE'])
 def view_project(pid):
     proj = Project.query.get(pid)
@@ -216,22 +242,28 @@ def view_user(uid):
     user = User.get(uid)
     # owns = db.engine.execute("select * from project where caretaker_id = {} limit 10".format(user.id))
     owns = Project.query.filter_by(caretaker_id=user.id).limit(10)
-    return render_template('view_user.html', user=user, owns=list(owns))
+    apps = Application.query.filter_by(user_id=uid).limit(10)
+    # sql = ('select * from application '
+    #        'where project_id in ('
+    #        'select project_id from project '
+    #        'where caretaker_id={})'
+    #        ).format(uid)
+    return render_template('view_user.html', user=user, owns=list(owns), apps=list(apps))
 
 
-@app.route('/<pid>/applications', methods=['GET', 'POST', 'DELETE'])
+@app.route('/<pid>/applications', methods=['GET', 'DELETE'])
 def view_proj_apps(pid):
     proj = Project.query.get(pid)
     apps = Application.query.filter_by(project=proj)
-    if request.method == "POST":
+    if request.method == "DELETE":
         j = request.get_json()
         decision = j['decision']
         user_id = j['user_id']
         user = User.query.get(user_id)
         if decision:
             proj.caretaker = user
-            proj.caretaker_id=user_id
-            delApp = Application.query.get(user)
+            proj.caretaker_id = user_id
+            delApp = Application.query.get(user_id)
             db.session.delete(delApp)
             db.session.commit()
             return render_template('home.html')
@@ -243,11 +275,12 @@ def view_proj_apps(pid):
     else:
         return render_template('view_applications.html', applications=apps, project=proj)
 
+
 @app.route('/tags/<tag>', methods=['GET', 'DELETE'])
 def view_project_tag(tag):
-    #proj = Project.query.filter(tags = tag)
+    # proj = Project.query.filter(tags = tag)
     proj = db.engine.execute("select * from project where tags like '%%{0}%%'".format(tag))
-    
+
     if request.method == 'DELETE':
         db.session.delete(proj)
         db.session.commit()
@@ -255,8 +288,7 @@ def view_project_tag(tag):
             'success': True
         })
     else:
-        return render_template('view_project_tag.html', tag_projects=proj, tag_name = tag)
-
+        return render_template('view_project_tag.html', tag_projects=proj, tag_name=tag)
 
 
 @app.route('/register', methods=['GET', 'POST'])
