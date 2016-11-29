@@ -17,3 +17,6 @@ class RegisterForm(FlaskForm):
     ])
     confirm = PasswordField('Confirm Password')
     github_id = StringField('GitHub username', [validators.DataRequired()])
+
+class ApplicationForm(FlaskForm):
+    justification = StringField('Justification', [validators.Length(min=0, max=200)])

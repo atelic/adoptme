@@ -1,24 +1,38 @@
 import datetime
 
 import flask
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, g
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required
 
-#import tempfile
-#import os.path
+import tempfile
+import os.path
 
 from forms import RegisterForm, LoginForm
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/test.db'
+#app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/test.db'
 # For PCs since no /tmp on PC
-#app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(tempfile.gettempdir(), 'test.db')
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(tempfile.gettempdir(), 'test.db')
 app.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT'
 db = SQLAlchemy(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 
+
+class Application(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    user = db.relationship('User')
+    project_id = db.Column(db.Integer, db.ForeignKey('project.id'))
+    project = db.relationship('Project')
+    justification = db.Column(db.String(200))
+    __tablename__= 'application'
+
+    def __init__(self, user, project, justification):
+        self.user = user
+        self.project = project
+        self.justification = justification
 
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
@@ -94,6 +108,8 @@ class Project(db.Model):
 @login_manager.user_loader
 def load_user(user_id):
     # return db.engine.execute("select * from user where user.id = {}".format(user_id))
+    user = User.get(user_id)
+    g.user = user
     return User.get(user_id)
 
 
@@ -117,6 +133,39 @@ def new_project():
         db.session.add(proj)
         db.session.commit()
         return jsonify(proj.to_dict())
+
+
+@app.route('/application/<pid>', methods=['GET', 'POST'])
+@login_required
+def proj_app(pid):
+    proj = Project.query.get(pid)
+    if request.method == 'POST':
+        j = request.get_json()
+        justification = j['justification']
+        user_id = j['user_id']
+        user = User.query.get(user_id)
+        a = Application(user, proj, justification)
+        db.session.add(a)
+        db.session.commit()
+        '''
+        projApps = Application.query.filter_by(project_id=proj.id)
+        if projApps != None:
+            check = projApps.query.get(user_id)
+        else:
+            check = None
+        if check != None:
+            check.justification = justification
+            db.session.commit()
+        else:
+            db.session.add(a)
+            db.session.commit()
+        '''
+        return render_template('home.html')
+    else:
+        return render_template('project_application.html', project=proj)
+
+
+
 
 
 @app.route('/projects/<pid>', methods=['GET', 'DELETE'])
@@ -164,6 +213,30 @@ def view_user(uid):
     # owns = db.engine.execute("select * from project where caretaker_id = {} limit 10".format(user.id))
     owns = Project.query.filter_by(caretaker_id=user.id).limit(10)
     return render_template('view_user.html', user=user, owns=list(owns))
+
+@app.route('/<pid>/applications', methods=['GET', 'POST', 'DELETE'])
+def view_proj_apps(pid):
+    proj = Project.query.get(pid)
+    apps = Application.query.filter_by(project=proj)
+    if request.method == "POST":
+        j = request.get_json()
+        decision = j['decision']
+        user_id = j['user_id']
+        user = User.query.get(user_id)
+        if decision == True:
+            proj.caretaker = user
+            proj.caretaker_id=user_id
+            delApp = Application.query.get(user_id)
+            db.session.delete(delApp)
+            db.session.commit()
+            return render_template('home.html')
+        else:
+            delApp = Application.query.get(user_id)
+            db.session.delete(delApp)
+            db.session.commit()
+            return render_template('view_applications.html', applications=apps, project=proj)
+    else:
+        return render_template('view_applications.html', applications=apps, project=proj)
 
 
 @app.route('/register', methods=['GET', 'POST'])

@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12"></div>
+            <form id="newApplication">
+                <div class="form-group">
+                    <label>Why do you want to adopt this project?</label>
+                   <!--<textarea type="text" class="form-control" id="justification" placeholder="Justification" rows="6"></textarea>-->
+                    <input type="text" class="form-control" id="justification" placeholder="Justification">
+                </div>
+            </form>
+            <button id="submit" class="btn btn-primary">Submit</button>
+        </div>
+    </div>
+
+    <script>
+    $("#submit").click(function(e) {
+        var data = {
+            'justification': $("#justification").val(),
+            'user_id': {{ current_user.id }}
+        };
+        $.ajax({
+            type: "POST",
+            url: "/application/{{ project.id }}",
+            data: JSON.stringify(data, null, '\t'),
+            contentType: 'application/json;charset=UTF-8',
+            success: function () {
+                window.location.href = '/'
+            }
+        });
+    });
+    </script>
+{% endblock %}
