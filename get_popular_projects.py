@@ -25,6 +25,7 @@ def insert_repos(repos):
             repo['description'],
             caretaker_id=user.id
         )
+        p.tags = repo['languages']
         db.session.add(p)
         db.session.commit()
         orph = Orphan(
@@ -51,7 +52,8 @@ def main(dry=True):
             'private': item['private'],
             'description': item['description'],
             'owner': item['owner']['login'],
-            'languages': requests.get(GH_API_BASE + 'repos/{}/languages'.format(item['full_name'])).json().keys()
+            'languages': ','.join(
+                requests.get(GH_API_BASE + 'repos/{}/languages'.format(item['full_name'])).json().keys())
         }
         repos.append(r)
 
