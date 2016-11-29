@@ -18,7 +18,7 @@
     <script>
     $("#submit").click(function(e) {
         var data = {
-            'justification': $("#justification").val(),
+            'justification': $("#justification").val().trim(),
             'user_id': {{ current_user.id }}
         };
         $.ajax({

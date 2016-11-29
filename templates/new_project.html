@@ -26,9 +26,9 @@
     <script>
     $("#submit").click(function(e) {
         var data = {
-            'name': $("#projectName").val(),
-            'link': $("#githublink").val(),
-            'description': $("#description").val(),
+            'name': $("#projectName").val().trim(),
+            'link': $("#githublink").val().trim(),
+            'description': $("#description").val().trim(),
             'caretaker_id': {{ current_user.id }}
         };
         $.ajax({

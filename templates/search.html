@@ -42,7 +42,7 @@
     {% endif %}
     <script>
         $("#searchBtn").click(function () {
-            window.location.href = '/search?q=' + $("#q").val();
+            window.location.href = '/search?q=' + $("#q").val().trim();
         });
     </script>
 {% endblock %}

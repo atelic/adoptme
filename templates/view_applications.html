@@ -10,8 +10,10 @@
                         <div class="card-block">
                             <h4 class="card-title">{{ apps.user.username }}</h4>
                             <p class="card-text">{{ apps.justification }}</p>
-                            <button id="approve" class="btn btn-success" value="{{ apps.user_id }}">Accept</button>
-                            <button id="decline" class="btn btn-danger" value="{{ apps.user_id }}">Decline</button>
+                            {% if current_user == project.caretaker %}
+                                <button id="approve" class="btn btn-success" value="{{ apps.user_id }}">Accept</button>
+                                <button id="decline" class="btn btn-danger" value="{{ apps.user_id }}">Decline</button>
+                            {% endif %}
                         </div>
                     </div>
                 {% endfor %}
@@ -21,37 +23,37 @@
 
 
     <script>
-    $("#approve").click(function(e) {
-        var data = {
-            'decision': true,
-            'user_id': $("#approve").val()
-        };
-        $.ajax({
-            type: "POST",
-            url: "/{{ project.id }}/applications",
-            data: JSON.stringify(data, null, '\t'),
-            contentType: 'application/json;charset=UTF-8',
-            success: function () {
-                window.location.href = '/'
-            }
+        $("#approve").click(function (e) {
+            var data = {
+                'decision': true,
+                'user_id': $("#approve").val().trim()
+            };
+            $.ajax({
+                type: "DELETE",
+                url: "/{{ project.id }}/applications",
+                data: JSON.stringify(data, null, '\t'),
+                contentType: 'application/json;charset=UTF-8',
+                success: function () {
+                    window.location.href = '/'
+                }
+            });
         });
-    });
 
-    $("#decline").click(function(e) {
-        var data = {
-            'decision': false,
-            'user_id': $("#decline").val()
-        };
-        $.ajax({
-            type: "POST",
-            url: "/{{ project.id }}/applications",
-            data: JSON.stringify(data, null, '\t'),
-            contentType: 'application/json;charset=UTF-8',
-            success: function () {
-                window.location.href = '/'
-            }
+        $("#decline").click(function (e) {
+            var data = {
+                'decision': false,
+                'user_id': $("#decline").val().trim()
+            };
+            $.ajax({
+                type: "DELETE",
+                url: "/{{ project.id }}/applications",
+                data: JSON.stringify(data, null, '\t'),
+                contentType: 'application/json;charset=UTF-8',
+                success: function () {
+                    window.location.href = '/'
+                }
+            });
         });
-    });
 
     </script>
 {% endblock %}
