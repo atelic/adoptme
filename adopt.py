@@ -5,10 +5,18 @@ from flask import Flask, render_template, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required
 
+#import tempfile
+#import os.path
+
 from forms import RegisterForm, LoginForm
 
 app = Flask(__name__)
+
+#Ryan's DB credentials
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:pword@localhost/DBProj'
+
+# For PCs since no /tmp on PC
+#app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(tempfile.gettempdir(), 'test.db')
 app.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT'
 db = SQLAlchemy(app)
 login_manager = LoginManager()
@@ -70,8 +78,6 @@ class Project(db.Model):
         self.caretaker_id = caretaker_id
         self.tags = ''
         if caretaker_id:
-            #import ipdb;
-            #ipdb.set_trace()
             user = User.query.get(caretaker_id)
             self.caretaker = user
         else:
@@ -93,11 +99,14 @@ class Project(db.Model):
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.get(user_id)
+    # return db.engine.execute("select * from user where user.id = {}".format(user_id))
+    user = User.get(user_id)
+    return user
 
 
 @app.route('/')
 def index():
+    # top_projects = db.engine.execute("select * from project limit 10 order by project.date_added desc")
     top_projects = sorted(Project.query.all()[:10], key=lambda p: p.date_added, reverse=True)
     return render_template('home.html', top_projects=top_projects)
 
@@ -111,6 +120,7 @@ def new_project():
         j = request.get_json()
         # Probably should handle exceptions
         proj = Project(j['name'], j['link'], j['description'], caretaker_id=j['caretaker_id'])
+        # db.engine.execute("insert into project values (NULL, {}, NULL, '', {}, {})".format(j['name'], j['link'], j['description']))
         db.session.add(proj)
         db.session.commit()
         return jsonify(proj.to_dict())
@@ -120,6 +130,7 @@ def new_project():
 def view_project(pid):
     proj = Project.query.get(pid)
     if request.method == 'DELETE':
+        # db.engine.execute("delete from project where project.id={}".format(pid))
         db.session.delete(proj)
         db.session.commit()
         return jsonify({
@@ -127,6 +138,31 @@ def view_project(pid):
         })
     else:
         return render_template('view_project.html', project=proj)
+
+
+@app.route('/projects/<pid>/edit', methods=['GET', 'PATCH'])
+def edit_project(pid):
+    proj = Project.query.get(pid)
+
+    if request.method == 'GET':
+        return render_template('edit_project.html', project=proj)
+    else:
+        j = request.get_json()
+        name = j['name']
+        link = j['link']
+        desc = j['description']
+        # sql = (
+        #     'update project'
+        #     'set project_name={name}, github_repo={link}, description={desc}'
+        #     'where id={pid}'
+        # ).format(name=name, link=link, desc=desc, pid=proj.pid)
+
+        proj.project_name = name or proj.project_name
+        proj.github_repo = link or proj.github_repo
+        proj.description = desc or proj.description
+        db.session.add(proj)
+        db.session.commit()
+        return jsonify(proj.to_dict())
 
 
 @app.route('/users/<uid>')
@@ -193,6 +229,23 @@ def login():
 def logout():
     logout_user()
     return flask.redirect(flask.url_for('index'))
+
+
+@app.route('/search')
+def search():
+    q = request.args.get('q')
+    projects = None
+    if q:
+        sql = (
+            'select * from project '
+            'where project_name like "%{}%"'
+            'or tags like "%{}%"'
+            'or description like "%{}"'
+            'limit 15;'
+        ).format(q, q, q)
+        projects = list(db.engine.execute(sql))
+
+    return render_template('search.html', projects=projects, q=q)
 
 
 if __name__ == '__main__':

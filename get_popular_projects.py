@@ -3,7 +3,7 @@ import sys
 
 import requests
 
-from adopt import db, Project, User
+from adopt import db, Project, User, app
 
 GH_API_BASE = 'https://api.github.com/'
 
@@ -25,6 +25,7 @@ def insert_repos(repos):
             repo['description'],
             caretaker_id=user.id
         )
+        p.tags = repo['languages']
         db.session.add(p)
         db.session.commit()
 
@@ -45,7 +46,8 @@ def main(dry=True):
             'private': item['private'],
             'description': item['description'],
             'owner': item['owner']['login'],
-            'languages': requests.get(GH_API_BASE + 'repos/{}/languages'.format(item['full_name'])).json().keys()
+            'languages': ','.join(
+                requests.get(GH_API_BASE + 'repos/{}/languages'.format(item['full_name'])).json().keys())
         }
         repos.append(r)
 
@@ -55,4 +57,6 @@ def main(dry=True):
 
 if __name__ == '__main__':
     dry = '--dry' in sys.argv or '-d' in sys.argv
+    db.init_app(app)
+    db.create_all()
     main(dry=dry)
