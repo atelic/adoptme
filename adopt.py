@@ -94,7 +94,8 @@ class Project(db.Model):
 @login_manager.user_loader
 def load_user(user_id):
     # return db.engine.execute("select * from user where user.id = {}".format(user_id))
-    return User.get(user_id)
+    user = User.get(user_id)
+    return user
 
 
 @app.route('/')
@@ -208,6 +209,21 @@ def login():
 def logout():
     logout_user()
     return flask.redirect(flask.url_for('index'))
+
+
+@app.route('/search')
+def search():
+    q = request.args.get('q')
+    projects = None
+    if q:
+        sql = (
+            'select * from project '
+            'where project_name like "%{}%"'
+            'limit 15;'
+        ).format(q)
+        projects = list(db.engine.execute(sql))
+
+    return render_template('search.html', projects=projects)
 
 
 if __name__ == '__main__':
