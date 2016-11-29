@@ -19,6 +19,16 @@
                 </div>
             </div>
         </div>
+
+    {% elif not projects and q %}
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    <h1>No projects matching your search found</h1>
+                </div>
+            </div>
+        </div>
+
     {% else %}
         <div class="container">
             <div class="row">

@@ -220,11 +220,12 @@ def search():
             'select * from project '
             'where project_name like "%{}%"'
             'or tags like "%{}%"'
+            'or description like "%{}"'
             'limit 15;'
-        ).format(q, q)
+        ).format(q, q, q)
         projects = list(db.engine.execute(sql))
 
-    return render_template('search.html', projects=projects)
+    return render_template('search.html', projects=projects, q=q)
 
 
 if __name__ == '__main__':
