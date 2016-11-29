@@ -5,15 +5,15 @@ from flask import Flask, render_template, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required
 
-#import tempfile
-#import os.path
+import tempfile
+import os.path
 
 from forms import RegisterForm, LoginForm
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/test.db'
 # For PCs since no /tmp on PC
-#app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(tempfile.gettempdir(), 'test.db')
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(tempfile.gettempdir(), 'test.db')
 app.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT'
 db = SQLAlchemy(app)
 login_manager = LoginManager()
@@ -90,7 +90,31 @@ class Project(db.Model):
             'description': self.description
         }
 
-
+class Orphan(db.Model):
+    orphan_id = db.Column(db.Integer, primary_key = True)
+    project_id = db.Column(db.Integer, db.ForeignKey('project.id'), nullable=True)
+    project = db.relationship('Project')
+    project_name = db.Column(db.String(120))
+    date_orphaned = db.Column(db.Date(), default=datetime.datetime.now())    
+    
+    def __init__(self, name, project_id = None):
+        self.project_name = name
+        if project_id:
+            project = Project.query.get(project_id)
+            self.project = project
+        else:
+            self.project = 'test'
+    
+class Organization(db.Model):
+    org_id = db.Column(db.Integer, primary_key=True)
+    org_name = db.Column(db.String(120))
+    license_type = db.Column(db.String(20))
+        
+class Adopted(db.Model):
+    adopted_id = db.Column(db.Integer, primary_key = True)
+    project_id = db.Column(db.Integer, db.ForeignKey('project.id'), nullable=True)
+   
+ 
 @login_manager.user_loader
 def load_user(user_id):
     # return db.engine.execute("select * from user where user.id = {}".format(user_id))

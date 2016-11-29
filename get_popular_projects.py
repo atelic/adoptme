@@ -3,7 +3,7 @@ import sys
 
 import requests
 
-from adopt import db, Project, User, app
+from adopt import db, Project, User, Orphan, app
 
 GH_API_BASE = 'https://api.github.com/'
 
@@ -26,6 +26,12 @@ def insert_repos(repos):
             caretaker_id=user.id
         )
         db.session.add(p)
+        db.session.commit()
+        orph = Orphan(
+            repo['name'],
+            project_id = p.id
+        )
+        db.session.add(orph)
         db.session.commit()
 
 
