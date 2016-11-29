@@ -10,7 +10,7 @@
                         <div class="card-block">
                             <h4 class="card-title">{{ apps.user.username }}</h4>
                             <p class="card-text">{{ apps.justification }}</p>
-                            {% if current_user == project.caretaker %}
+                            {% if current_user.id == project.caretaker_id %}
                                 <button id="approve" class="btn btn-success" value="{{ apps.user_id }}">Accept</button>
                                 <button id="decline" class="btn btn-danger" value="{{ apps.user_id }}">Decline</button>
                             {% endif %}

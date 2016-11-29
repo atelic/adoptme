@@ -4,6 +4,20 @@
     <div class="container">
         <div class="row">
             <div class="col-md-9">
+                {% if apps %}
+                    <h1>Outstanding project applications:</h1>
+                    {% for app in apps %}
+                        <div class="card">
+                            <div class="card-block">
+                                <h4 class="card-title">{{ app.project.project_name }}</h4>
+                                <p class="card-text">{{ app.project.description }}</p>
+                                <a href="/projects/{{ app.project.id }}" class="btn btn-primary">View more</a>
+                                <a href="/{{ app.project.id }}/applications" class="btn btn-success">View
+                                    Applications</a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% endif %}
                 <h1>Projects maintained by {{ user.username }}:</h1>
 
                 {% for project in owns %}

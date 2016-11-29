@@ -17,11 +17,8 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:pword@localhost/DBProj'
 
 # For PCs since no /tmp on PC
-<<<<<<< HEAD
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(tempfile.gettempdir(), 'test.db')
-=======
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(tempfile.gettempdir(), 'test.db')
->>>>>>> origin/master
+
 app.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT'
 db = SQLAlchemy(app)
 login_manager = LoginManager()
@@ -242,7 +239,13 @@ def view_user(uid):
     user = User.get(uid)
     # owns = db.engine.execute("select * from project where caretaker_id = {} limit 10".format(user.id))
     owns = Project.query.filter_by(caretaker_id=user.id).limit(10)
-    return render_template('view_user.html', user=user, owns=list(owns))
+    apps = Application.query.filter_by(user_id=uid).limit(10)
+    # sql = ('select * from application '
+    #        'where project_id in ('
+    #        'select project_id from project '
+    #        'where caretaker_id={})'
+    #        ).format(uid)
+    return render_template('view_user.html', user=user, owns=list(owns), apps=list(apps))
 
 
 @app.route('/<pid>/applications', methods=['GET', 'DELETE'])
