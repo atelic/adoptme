@@ -11,7 +11,14 @@ import os.path
 from forms import RegisterForm, LoginForm
 
 app = Flask(__name__)
+<<<<<<< HEAD
 #app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/test.db'
+=======
+
+#Ryan's DB credentials
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:pword@localhost/DBProj'
+
+>>>>>>> c37fb8af447323cc129c8aeeed59546186aabd74
 # For PCs since no /tmp on PC
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(tempfile.gettempdir(), 'test.db')
 app.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT'
@@ -94,8 +101,11 @@ class Project(db.Model):
         else:
             self.caretaker = None
 
+
+
+
     def __repr__(self):
-        return '<Project {}>'.format(self.project_name)
+    	return '<Project {}>'.format(self.project_name)
 
     def to_dict(self):
         return {
@@ -111,6 +121,7 @@ def load_user(user_id):
     user = User.get(user_id)
     g.user = user
     return User.get(user_id)
+
 
 
 @app.route('/')
@@ -214,6 +225,7 @@ def view_user(uid):
     owns = Project.query.filter_by(caretaker_id=user.id).limit(10)
     return render_template('view_user.html', user=user, owns=list(owns))
 
+
 @app.route('/<pid>/applications', methods=['GET', 'POST', 'DELETE'])
 def view_proj_apps(pid):
     proj = Project.query.get(pid)
@@ -237,6 +249,21 @@ def view_proj_apps(pid):
             return render_template('view_applications.html', applications=apps, project=proj)
     else:
         return render_template('view_applications.html', applications=apps, project=proj)
+
+@app.route('/tags/<tag>', methods=['GET', 'DELETE'])
+def view_project_tag(tag):
+    #proj = Project.query.filter(tags = tag)
+    proj = db.engine.execute("select * from project where tags like '%%{0}%%'".format(tag))
+    
+    if request.method == 'DELETE':
+        db.session.delete(proj)
+        db.session.commit()
+        return jsonify({
+            'success': True
+        })
+    else:
+        return render_template('view_project_tag.html', tag_projects=proj, tag_name = tag)
+
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -281,6 +308,23 @@ def login():
 def logout():
     logout_user()
     return flask.redirect(flask.url_for('index'))
+
+
+@app.route('/search')
+def search():
+    q = request.args.get('q')
+    projects = None
+    if q:
+        sql = (
+            'select * from project '
+            'where project_name like "%{}%"'
+            'or tags like "%{}%"'
+            'or description like "%{}"'
+            'limit 15;'
+        ).format(q, q, q)
+        projects = list(db.engine.execute(sql))
+
+    return render_template('search.html', projects=projects, q=q)
 
 
 if __name__ == '__main__':

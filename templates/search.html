@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block content %}
+    {% if projects %}
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    <h1>Matching projects</h1><br>
+                    {% for project in projects %}
+                        <div class="card">
+                            <div class="card-block">
+                                <h4 class="card-title">{{ project.project_name }}</h4>
+                                <p class="card-text">{{ project.description }}</p>
+                                <a href="/projects/{{ project.id }}" class="btn btn-primary">View more</a>
+                                <a href="#" class="btn btn-success">Apply</a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+    {% elif not projects and q %}
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    <h1>No projects matching your search found</h1>
+                </div>
+            </div>
+        </div>
+
+    {% else %}
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    <h1>Search Projects</h1>
+                    <input class="form-control" id="q" type="text" placeholder="Search">
+                    <button class="btn btn-outline-success" id="searchBtn" type="submit">Search</button>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    <script>
+        $("#searchBtn").click(function () {
+            window.location.href = '/search?q=' + $("#q").val();
+        });
+    </script>
+{% endblock %}
