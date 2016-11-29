@@ -259,16 +259,16 @@ def view_proj_apps(pid):
         j = request.get_json()
         decision = j['decision']
         user_id = j['user_id']
-        user = User.query.get(user_id)
+        app_id = j['app_id']
+        delApp = Application.query.get(app_id)
+        user = delApp.user
         if decision:
             proj.caretaker = user
             proj.caretaker_id = user_id
-            delApp = Application.query.get(user_id)
             db.session.delete(delApp)
             db.session.commit()
             return render_template('home.html')
         else:
-            delApp = Application.query.get(user)
             db.session.delete(delApp)
             db.session.commit()
             return render_template('view_applications.html', applications=apps, project=proj)

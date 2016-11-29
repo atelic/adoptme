@@ -26,7 +26,8 @@
         $("#approve").click(function (e) {
             var data = {
                 'decision': true,
-                'user_id': $("#approve").val().trim()
+                'app_id': $("#approve").val(),
+                'user_id': {{ current_user.id }}
             };
             $.ajax({
                 type: "DELETE",
@@ -42,7 +43,8 @@
         $("#decline").click(function (e) {
             var data = {
                 'decision': false,
-                'user_id': $("#decline").val().trim()
+                'app_id': $("#decline").val(),
+                'user_id': {{ current_user.id }}
             };
             $.ajax({
                 type: "DELETE",
