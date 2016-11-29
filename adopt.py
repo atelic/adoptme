@@ -219,8 +219,9 @@ def search():
         sql = (
             'select * from project '
             'where project_name like "%{}%"'
+            'or tags like "%{}%"'
             'limit 15;'
-        ).format(q)
+        ).format(q, q)
         projects = list(db.engine.execute(sql))
 
     return render_template('search.html', projects=projects)
