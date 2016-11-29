@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="col-md-9">
+                <h1>Projects tagged by {{ tag_name }}</h1><br>
+                {% for project in tag_projects %}
+                    <div class="card">
+                        <div class="card-block">
+                            <h4 class="card-title">{{ project.project_name }}</h4>
+                            <p class="card-text">{{ project.description }}</p>
+                            <a href="/projects/{{ project.id }}" class="btn btn-primary">View more</a>
+                            <a href="#" class="btn btn-success">Apply</a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="col-md-3">
+                <h1>Browse Tags</h1><br>
+                <ul class="list-group">
+                    <li class="list-group-item"><a href="/tags/python">Python</a></li>
+                    <li class="list-group-item"><a href="/tags/javascript">Javascript</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+{% endblock %}

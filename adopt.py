@@ -8,7 +8,7 @@ from flask_login import LoginManager, UserMixin, login_user, logout_user, login_
 from forms import RegisterForm, LoginForm
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/test.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:pword@localhost/DBProj'
 app.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT'
 db = SQLAlchemy(app)
 login_manager = LoginManager()
@@ -70,15 +70,18 @@ class Project(db.Model):
         self.caretaker_id = caretaker_id
         self.tags = ''
         if caretaker_id:
-            import ipdb;
-            ipdb.set_trace()
+            #import ipdb;
+            #ipdb.set_trace()
             user = User.query.get(caretaker_id)
             self.caretaker = user
         else:
             self.caretaker = None
 
+
+
+
     def __repr__(self):
-        return '<Project {}>'.format(self.project_name)
+    	return '<Project {}>'.format(self.project_name)
 
     def to_dict(self):
         return {
@@ -132,6 +135,19 @@ def view_user(uid):
     # owns = db.engine.execute("select * from project where caretaker_id = {} limit 10".format(user.id))
     owns = Project.query.filter_by(caretaker_id=user.id).limit(10)
     return render_template('view_user.html', user=user, owns=list(owns))
+
+@app.route('/tags/<tag>', methods=['GET', 'DELETE'])
+def view_project_tag(tag):
+    #proj = Project.query.filter(tags = tag)
+    proj = db.engine.execute("select * from project where tags like '%%{0}%%'".format(tag))
+    if request.method == 'DELETE':
+        db.session.delete(proj)
+        db.session.commit()
+        return jsonify({
+            'success': True
+        })
+    else:
+        return render_template('view_project_tag.html', tag_projects=proj, tag_name = tag)
 
 
 @app.route('/register', methods=['GET', 'POST'])
