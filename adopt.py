@@ -11,14 +11,9 @@ import os.path
 from forms import RegisterForm, LoginForm
 
 app = Flask(__name__)
-<<<<<<< HEAD
+
 #app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/test.db'
-=======
 
-#Ryan's DB credentials
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:pword@localhost/DBProj'
-
->>>>>>> c37fb8af447323cc129c8aeeed59546186aabd74
 # For PCs since no /tmp on PC
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(tempfile.gettempdir(), 'test.db')
 app.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT'
@@ -118,8 +113,6 @@ class Project(db.Model):
 @login_manager.user_loader
 def load_user(user_id):
     # return db.engine.execute("select * from user where user.id = {}".format(user_id))
-    user = User.get(user_id)
-    g.user = user
     return User.get(user_id)
 
 
@@ -235,15 +228,15 @@ def view_proj_apps(pid):
         decision = j['decision']
         user_id = j['user_id']
         user = User.query.get(user_id)
-        if decision == True:
+        if decision:
             proj.caretaker = user
             proj.caretaker_id=user_id
-            delApp = Application.query.get(user_id)
+            delApp = Application.query.get(user)
             db.session.delete(delApp)
             db.session.commit()
             return render_template('home.html')
         else:
-            delApp = Application.query.get(user_id)
+            delApp = Application.query.get(user)
             db.session.delete(delApp)
             db.session.commit()
             return render_template('view_applications.html', applications=apps, project=proj)
